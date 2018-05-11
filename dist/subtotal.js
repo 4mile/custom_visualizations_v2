@@ -81,43 +81,89 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ag_grid_main__ = __webpack_require__(596);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_ag_grid_main___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_ag_grid_main__);
-var _this = this;
 
-var vis = {
-    id: 'subtotal',
-    label: 'Subtotal',
-    options: {},
-    create: function (element, config) {
+var Subtotal = /** @class */ (function () {
+    function Subtotal() {
+        this.id = 'subtotal';
+        this.label = 'Subtotal';
+        this.options = {};
+    }
+    Subtotal.prototype.create = function (element, config) {
         // Add stylesheets recommended by ag-Grid.
-        [
+        var stylesheets = [
             'https://unpkg.com/ag-grid/dist/styles/ag-grid.css',
             'https://unpkg.com/ag-grid/dist/styles/ag-theme-balham.css'
-        ].forEach(function (url) {
+        ];
+        stylesheets.forEach(function (url) {
             var link = document.createElement('link');
-            link.href = url;
             link.rel = 'stylesheet';
-            element.appendChild(link);
+            link.href = url;
+            document.head.appendChild(link);
         });
-        var gridOptions = {};
-        _this.grid = new __WEBPACK_IMPORTED_MODULE_0_ag_grid_main__["Grid"](element, gridOptions);
+        element.classList.add('ag-theme-balham');
         // XXX
         console.log('create - element=', element);
         console.log('create - config=', config);
-    },
-    update: function (data, element, config, queryResponse, details) {
+    };
+    Subtotal.prototype.update = function (data, element, config, queryResponse, details) {
+        if (!this.grid) {
+            var gridOptions = {};
+            gridOptions.columnDefs = [];
+            var valueGetter = function (params) {
+                console.log('XXX getter', params);
+                var obj = params.colDef.field ? params.data[params.colDef.field] : null;
+                return obj ? obj.value : null;
+            };
+            var valueFormatter = function (params) {
+                console.log('XXX formatter', params);
+                var obj = params.colDef.field ? params.data[params.colDef.field] : null;
+                if (!obj)
+                    return null;
+                return obj.rendered != null ? obj.rendered : obj.value;
+            };
+            if (config.query_fields) {
+                for (var _i = 0, _a = config.query_fields.measures; _i < _a.length; _i++) {
+                    var measure = _a[_i];
+                    gridOptions.columnDefs.push({
+                        headerName: measure.label,
+                        field: measure.name,
+                        valueGetter: valueGetter,
+                        valueFormatter: valueFormatter
+                    });
+                }
+                for (var _b = 0, _c = config.query_fields.dimensions; _b < _c.length; _b++) {
+                    var dimension = _c[_b];
+                    gridOptions.columnDefs.push({
+                        headerName: dimension.label,
+                        field: dimension.name,
+                        valueGetter: valueGetter,
+                        valueFormatter: valueFormatter
+                    });
+                }
+            }
+            gridOptions.rowData = data;
+            console.log('XXX gridOptions', gridOptions);
+            this.grid = new __WEBPACK_IMPORTED_MODULE_0_ag_grid_main__["Grid"](element, gridOptions);
+        }
         // XXX
-        console.log('update - data=', data);
-        console.log('update - element=', element);
-        console.log('update - config=', config);
-        console.log('update - queryResponse=', queryResponse);
-        console.log('update - details=', details);
+        if (details && details.changed && details.changed.size) {
+            console.log('XXX resized');
+        }
+        else {
+            console.log('XXX update - data=', data);
+            console.log('XXX update - element=', element);
+            console.log('XXX update - config=', config);
+            console.log('XXX update - queryResponse=', queryResponse);
+            console.log('XXX update - details=', details);
+        }
         // this.addError!({
         //   title: 'oh crap',
         //   message: 'a thing happened'
         // })
-    }
-};
-looker.plugins.visualizations.add(vis);
+    };
+    return Subtotal;
+}());
+looker.plugins.visualizations.add(new Subtotal());
 
 
 /***/ }),
